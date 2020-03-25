@@ -36,6 +36,8 @@ export class Client<S, C, CC>
                 let msg = JSON.parse(e.data as any) as ServerMessage<S, C>;
                 if (msg.c != null)
                     this.pushCommand(msg.c);
+                else if (msg.s != null)
+                    this.state = msg.s;
                
             }
             this.websocket.onclose = ()=>
