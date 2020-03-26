@@ -42,7 +42,7 @@ export class Server<S, C>
             });
             conn.on('close', ()=>
             {
-                this.logger.info(`Client disconected with id: ${conn}`);
+                this.logger.info(`Client disconected with id: ${conn.id}`);
             });
         });
 
