@@ -58,7 +58,6 @@ export class Server<S, C>
 
     pushCommand(c:C, transmit:boolean)
     {
-        console.log(c);
         if (transmit)
         {
             this.websocketServer.clients.forEach((client:WebSocketWithId)=>
