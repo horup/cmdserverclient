@@ -15,7 +15,6 @@ client.handlers = [
     {
         if (c.tick)
         {
-            console.clear();
             console.log(s);
         }
     }

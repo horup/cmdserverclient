@@ -79,6 +79,8 @@ server.handlers =  [
     thinker
 ];
 
+server.handlers = [];
+
 setInterval(()=>
 {
     server.pushCommand({tick:{}}, true);

@@ -19,15 +19,14 @@ export class Server<S, C>
     handlers:Handler<S, C>[] = [];
     clientHandlers:Handler<S, C>[] = [];
 
-
     constructor(initialState:S,  logger:Logger = undefined)
     {
         this.state = initialState;
         this.logger = logger != null ? logger : {info:()=>{}};
     }
 
-    onClientConnected:(id:string)=>{};
-    onClientDisconnected:(id:string)=>{};
+    onClientConnected:(id:string)=>void = ()=>{};
+    onClientDisconnected:(id:string)=>void = ()=>{};
 
     attach(httpServer:http.Server)
     {
@@ -36,7 +35,7 @@ export class Server<S, C>
         {
             conn.id = uuid();
             this.logger.info(`Client connected with id: ${conn.id}`);
-            conn.send(JSON.stringify({s:this.state} as ServerMessage<S, C>));
+            conn.send(JSON.stringify({clientId:conn.id, s:this.state} as ServerMessage<S, C>));
             conn.on('message', (data)=>
             {
                 let clientMsg = JSON.parse(data.toString()) as ClientMessage<C>;

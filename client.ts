@@ -6,6 +6,7 @@ import {Handler, process} from './handler';
 /** Where S is the state and C is the command */
 export class Client<S, C>
 {
+    id:string;
     state:S;
     logger:Logger;
     websocket:WebSocket;
@@ -34,10 +35,12 @@ export class Client<S, C>
             {
                 this.logger.info(`Msg recv ${e.data}`);
                 let msg = JSON.parse(e.data as any) as ServerMessage<S, C>;
-                if (msg.c != null)
+                if (msg.c)
                     this.pushCommand(msg.c, false);
-                else if (msg.s != null)
+                if (msg.s)
                     this.state = msg.s;
+                if (msg.clientId)
+                    this.id = msg.clientId;
                
             }
             this.websocket.onclose = ()=>

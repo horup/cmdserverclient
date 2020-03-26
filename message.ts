@@ -1,6 +1,9 @@
 /** Message sent from the server to one or more clients */
 export interface ServerMessage<S, C>
 {
+    /** Inform the client its unique client id */
+    clientId?:string;
+
     /** Command of type C, if any */
     c?:C;
 
