@@ -37,8 +37,8 @@ export class Server<S, C>
             conn.on('message', (data)=>
             {
                 let clientMsg = JSON.parse(data.toString()) as ClientMessage<C>;
-                if (clientMsg.cc != null)
-                    this.pushClientCommand(clientMsg.cc);
+                if (clientMsg.c != null)
+                    this.pushClientCommand(clientMsg.c);
             });
             conn.on('close', ()=>
             {

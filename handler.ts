@@ -1,5 +1,9 @@
-export type Handler<S,C> = (s:S, c:C, push?:(c:C, forward:boolean)=>any) => any;
 
+/** A function which processes a command C, on a state S.
+ *  Push can be called to send new commands.
+ *  If transmit is true, the commands are also transmitted.
+ */
+export type Handler<S,C> = (s:S, c:C, push?:(c:C, transmit:boolean)=>any) => any;
 
 export function process<S,C>(handlers:Handler<S,C>[], s:S, c:C, push:(c:C, transmit:boolean)=>any)
 {

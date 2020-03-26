@@ -3,6 +3,7 @@ import * as WebSocket from 'isomorphic-ws';
 import { ClientMessage, ServerMessage } from "./message";
 import {Handler, process} from './handler';
 
+/** Where S is the state and C is the command */
 export class Client<S, C>
 {
     state:S;
@@ -52,11 +53,14 @@ export class Client<S, C>
         });
     }
 
+    /** Push a command to the client. 
+     *  This command is processed by zero or more handlers.
+     *  If transmit is true, the command is also transmitted to the server for processing. */
     private pushCommand(c:C, transmit:boolean)
     {
         if (transmit)
         {
-            this.websocket.send(JSON.stringify({cc:c} as ClientMessage<C>));
+            this.websocket.send(JSON.stringify({c:c} as ClientMessage<C>));
         }
 
         process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
