@@ -1,4 +1,4 @@
-import { State, Command } from "./interfaces";
+import { State, Command } from "./shared";
 
 
 export const setter = (s:State, c:Command)=>

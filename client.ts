@@ -1,17 +1,16 @@
 import { Logger } from "./logger";
 import * as WebSocket from 'isomorphic-ws';
 import { ClientMessage, ServerMessage } from "./message";
-export type CommandHandler<S, C> = (s:S, c:C)=>void;
+import {Handler, process} from './handler';
 
-export class Client<S, C, CC>
+export class Client<S, C>
 {
     state:S;
     logger:Logger;
     websocket:WebSocket;
-    commandHandlers:CommandHandler<S, C>[];
-    constructor(commandHandlers:CommandHandler<S, C>[], logger:Logger)
+    handlers:Handler<S, C>[] = [];
+    constructor(logger:Logger)
     {
-        this.commandHandlers = commandHandlers;
         this.logger = logger;
         if (this.logger == null)
         {
@@ -35,7 +34,7 @@ export class Client<S, C, CC>
                 this.logger.info(`Msg recv ${e.data}`);
                 let msg = JSON.parse(e.data as any) as ServerMessage<S, C>;
                 if (msg.c != null)
-                    this.pushCommand(msg.c);
+                    this.pushCommand(msg.c, false);
                 else if (msg.s != null)
                     this.state = msg.s;
                
@@ -53,17 +52,13 @@ export class Client<S, C, CC>
         });
     }
 
-    private pushCommand(c:C)
+    private pushCommand(c:C, transmit:boolean)
     {
-        this.commandHandlers.forEach(handler=>
+        if (transmit)
         {
-            let res = handler(this.state, c);
-        });
-    }
+            this.websocket.send(JSON.stringify({cc:c} as ClientMessage<C>));
+        }
 
-
-    pushClientCommand(cc:CC)
-    {
-        this.websocket.send(JSON.stringify({cc:cc} as ClientMessage<CC>));
+        process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
     }
 }

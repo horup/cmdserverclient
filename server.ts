@@ -3,28 +3,26 @@ import {Logger} from './logger';
 import * as WebSocket from 'ws';
 import {ClientMessage, ServerMessage} from './message';
 import {v4 as uuid} from 'uuid';
+import {Handler, process} from './handler';
 
 interface WebSocketWithId extends WebSocket
 {
     id:string;
 }
 
-export type CommandHandler<S, C> = (s:S, c:C)=>(C[] | void);
-export type ClientCommandHandler<S, C, CC> = (s:S, cc:CC)=>(C[] | void);
 
-export class Server<S, C, CC>
+export class Server<S, C>
 {
     private logger:Logger;
     private state:S;
     private websocketServer:WebSocket.Server;
-    private commandHandlers:CommandHandler<S, C>[];
-    private clientCommandHandlers:ClientCommandHandler<S, C, CC>[];
+    handlers:Handler<S, C>[] = [];
+    clientHandlers:Handler<S, C>[] = [];
 
-    constructor(initialState:S, commandHandlers:CommandHandler<S, C>[], clientCommandHandlers:ClientCommandHandler<S, C, CC>[], logger:Logger = undefined)
+
+    constructor(initialState:S,  logger:Logger = undefined)
     {
         this.state = initialState;
-        this.commandHandlers = commandHandlers;
-        this.clientCommandHandlers = clientCommandHandlers;
         this.logger = logger != null ? logger : {info:()=>{}};
     }
 
@@ -38,7 +36,7 @@ export class Server<S, C, CC>
             conn.send(JSON.stringify({s:this.state} as ServerMessage<S, C>));
             conn.on('message', (data)=>
             {
-                let clientMsg = JSON.parse(data.toString()) as ClientMessage<CC>;
+                let clientMsg = JSON.parse(data.toString()) as ClientMessage<C>;
                 if (clientMsg.cc != null)
                     this.pushClientCommand(clientMsg.cc);
             });
@@ -58,52 +56,30 @@ export class Server<S, C, CC>
         this.logger.info("Attached server to HTTP server");
     }
 
-    sendMessage(client:WebSocketWithId, msg:ServerMessage<S, C>)
+    pushCommand(c:C, transmit:boolean)
     {
-        client.send(JSON.stringify(msg));
-    }
-
-    pushCommand(c:C, transmit:boolean = true)
-    {
+        console.log(c);
         if (transmit)
         {
-            this.websocketServer.clients.forEach((client:WebSocketWithId) =>
+            this.websocketServer.clients.forEach((client:WebSocketWithId)=>
             {
-                this.sendMessage(client, {
+                this.sendMessage(client, 
+                {
                     c:c
                 });
             });
         }
 
-        let produced:C[] = [];
-        this.commandHandlers.forEach(handler=>
-        {
-            let res = handler(this.state, c);
-            if (res)
-                res.forEach(c=>produced.push(c));
-        });
-
-        while (produced.length > 0)
-        {
-            let c = produced.pop();
-            this.pushCommand(c);
-        }
+        process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
     }
 
-    pushClientCommand(c?:CC)
+    pushClientCommand(c:C)
     {
-        let produced:C[] = [];
-        this.clientCommandHandlers.forEach(handler=>
-        {
-            let res = handler(this.state, c);
-            if (res)
-                res.forEach(c=>produced.push(c));
-        });
+        process<S, C>(this.clientHandlers, this.state, c, this.pushCommand);
+    }
 
-        while (produced.length > 0)
-        {
-            let c = produced.pop();
-            this.pushCommand(c);
-        }
+    sendMessage(client:WebSocketWithId, msg:ServerMessage<S, C>)
+    {
+        client.send(JSON.stringify(msg));
     }
 }

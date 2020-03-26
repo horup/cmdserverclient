@@ -22,11 +22,14 @@ export interface Command
     tick?:{};
 
     /** Set monsters */
-    setMonsters?:{[id:number]:Monster}};
+    setMonsters?:{[id:number]:Monster};
 }
 
-export interface ClientCommand
+export const setter = (s:State, c:Command)=>
 {
-    /** Say something */
-    chat?:{msg:string};
+    if (c.setMonsters)
+    {
+        //s.monsters[c.setMonster.monster.id] = c.setMonster.monster;
+        s.monsters = {...s.monsters, ...c.setMonsters}; 
+    }
 }

@@ -1,7 +1,8 @@
 import { Logger } from "../logger";
-import { State, Command, ClientCommand, Monster } from "./interfaces";
+import { State, Command, Monster } from "./shared";
 import { Server } from "../server";
 import { setter } from "./handlers";
+import { Handler } from "../handler";
 
 const logger:Logger = 
 {
@@ -9,11 +10,10 @@ const logger:Logger =
 }
 
 let nextId = 0;
-const spawner = (s:State, c:Command)=>
+const spawner:Handler<State, Command> = (s, c, push) =>
 {
     if (c.tick)
     {
-        let commands:Command[] = [];
         if (Object.keys(s.monsters).length < 2)
         {
             let id = nextId++
@@ -22,15 +22,14 @@ const spawner = (s:State, c:Command)=>
                 x:Math.random()*100, 
                 y:Math.random()*100
             };
-            
-            commands.push({
+
+            const cc = {
                 setMonsters:{
                     [id]:monster
                 }
-            })
+            };
+            push(cc, true)
         }
-
-        return commands;
     }
 }
 
@@ -76,17 +75,14 @@ const initialState:State = {
     round:0
 }
 
-export const server = new Server<State, Command, ClientCommand>(initialState, 
-    [
-        spawner, 
-        setter,
-        thinker
-    ],
-    [
-        
-    ], logger);
+export const server = new Server<State, Command>(initialState, logger);
+server.handlers =  [
+    spawner, 
+    setter,
+    thinker
+];
 
 setInterval(()=>
 {
-    server.pushCommand({tick:{}});
+    server.pushCommand({tick:{}}, true);
 }, 1000);

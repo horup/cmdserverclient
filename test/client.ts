@@ -1,6 +1,6 @@
 import { Logger } from "../logger";
 import { Client } from "../client";
-import { State, Command, ClientCommand } from "./interfaces";
+import { State, Command } from "./shared";
 import { setter } from "./handlers";
 
 const logger:Logger = 
@@ -8,7 +8,8 @@ const logger:Logger =
     info:(s:string)=>console.log("CLIENT> "+ s)
 }
 
-export const client = new Client<State, Command, ClientCommand>([
+export const client = new Client<State, Command>(logger);
+client.handlers = [
     setter,
     (s, c)=>
     {
@@ -18,4 +19,4 @@ export const client = new Client<State, Command, ClientCommand>([
             console.log(s);
         }
     }
-], logger);
+]
