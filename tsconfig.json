@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
-        "noImplicitThis": true
+        "noImplicitThis": true,
+        "outDir": "dist",
+        "lib": ["ES2018"],
+        "declaration": true
     }
 }

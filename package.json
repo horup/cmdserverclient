@@ -2,8 +2,10 @@
   "name": "cmdserverclient",
   "version": "1.0.0",
   "description": "A reusable command pattern server and client",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "prepare": "npm run build",
+    "build":"tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsnd --respawn  ./test/index.ts"
   },
