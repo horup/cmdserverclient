@@ -26,6 +26,9 @@ export class Server<S, C>
         this.logger = logger != null ? logger : {info:()=>{}};
     }
 
+    onClientConnected:(id:string)=>{};
+    onClientDisconnected:(id:string)=>{};
+
     attach(httpServer:http.Server)
     {
         this.websocketServer = new WebSocket.Server({noServer:true});
@@ -43,7 +46,10 @@ export class Server<S, C>
             conn.on('close', ()=>
             {
                 this.logger.info(`Client disconected with id: ${conn.id}`);
+                this.onClientDisconnected(conn.id);
             });
+
+            this.onClientConnected(conn.id);
         });
 
         httpServer.on('upgrade', (req,socket, head)=>
