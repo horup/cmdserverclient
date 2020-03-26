@@ -48,11 +48,10 @@ const cleaner = (s:State, c:Command)=>
     }
 }
 
-const thinker = (s:State, c:Command)=>
+const thinker:Handler<State, Command> = (s, c, push) =>
 {
     if (c.tick)
     {
-        const changes:Command[] = [];
         for (let id in s.monsters)
         {
             let m = s.monsters[id];
@@ -60,13 +59,11 @@ const thinker = (s:State, c:Command)=>
             {
                 let x = m.x + Math.random() - 0.5;
                 let y = m.y + Math.random() - 0.5;
-                changes.push({
+                push({
                     setMonsters:{[id]:{...m, ...{x:x, y:y}}}
-                })
+                }, true)
             }
         }
-
-        return changes;
     }
 }
 

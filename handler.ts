@@ -3,7 +3,7 @@
  *  Push can be called to send new commands.
  *  If transmit is true, the commands are also transmitted.
  */
-export type Handler<S,C> = (s:S, c:C, push?:(c:C, transmit:boolean)=>any) => any;
+export type Handler<S,C> = (s:S, c:C, push?:(c:C, transmit:boolean)=>void) => void;
 
 export function process<S,C>(handlers:Handler<S,C>[], s:S, c:C, push:(c:C, transmit:boolean)=>any)
 {
