@@ -59,7 +59,7 @@ export class Client<S, C>
     /** Push a command to the client. 
      *  This command is processed by zero or more handlers.
      *  If transmit is true, the command is also transmitted to the server for processing. */
-    private pushCommand(c:C, transmit:boolean)
+    pushCommand(c:C, transmit:boolean)
     {
         if (transmit)
         {
