@@ -79,7 +79,7 @@ export class Server<S, C>
 
     pushClientCommand(c:C)
     {
-        process<S, C>(this.clientHandlers, this.state, c, this.pushCommand);
+        process<S, C>(this.clientHandlers, this.state, c, (c,t)=>this.pushCommand(c,t));
     }
 
     sendMessage(client:WebSocketWithId, msg:ServerMessage<S, C>)
