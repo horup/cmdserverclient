@@ -40,7 +40,7 @@ export class Server<S, C>
             {
                 let clientMsg = JSON.parse(data.toString()) as ClientMessage<C>;
                 if (clientMsg.c != null)
-                    this.pushClientCommand(clientMsg.c);
+                    this.pushClientCommand(clientMsg.c, conn.id);
             });
             conn.on('close', ()=>
             {
@@ -77,9 +77,9 @@ export class Server<S, C>
         process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
     }
 
-    pushClientCommand(c:C)
+    pushClientCommand(c:C, clientId:string)
     {
-        process<S, C>(this.clientHandlers, this.state, c, (c,t)=>this.pushCommand(c,t));
+        process<S, C>(this.clientHandlers, this.state, c, (c,t)=>this.pushCommand(c,t), clientId);
     }
 
     sendMessage(client:WebSocketWithId, msg:ServerMessage<S, C>)

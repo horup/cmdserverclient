@@ -9,5 +9,5 @@ client.connect("http://localhost:8080");
 
 setInterval(()=>
 {
-    console.log(client.id);
+    client.pushCommand({chat:{msg:'Hi!', from:"Client"}}, true)
 }, 1000);
