@@ -11,8 +11,9 @@ interface WebSocketWithId extends WebSocket
 }
 
 
-export class Server<S, C>
+export class Server<S, C, O=any>
 {
+    context:O = null;
     private logger:Logger;
     private state:S;
     private websocketServer:WebSocket.Server;
@@ -74,12 +75,12 @@ export class Server<S, C>
             });
         }
 
-        process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
+        process<S, C, O>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t), null, this.context);
     }
 
     pushClientCommand(c:C, clientId:string)
     {
-        process<S, C>(this.clientHandlers, this.state, c, (c,t)=>this.pushCommand(c,t), clientId);
+        process<S, C, O>(this.clientHandlers, this.state, c, (c,t)=>this.pushCommand(c,t), clientId, this.context);
     }
 
     sendMessage(client:WebSocketWithId, msg:ServerMessage<S, C>)

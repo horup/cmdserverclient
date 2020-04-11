@@ -4,8 +4,9 @@ import { ClientMessage, ServerMessage } from "./message";
 import {Handler, process} from './handler';
 
 /** Where S is the state and C is the command */
-export class Client<S, C>
+export class Client<S, C, O=any>
 {
+    context:O = null;
     id:string;
     state:S;
     logger:Logger;
@@ -66,6 +67,6 @@ export class Client<S, C>
             this.websocket.send(JSON.stringify({c:c} as ClientMessage<C>));
         }
 
-        process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t));
+        process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t), this.id, this.context);
     }
 }
