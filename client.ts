@@ -12,6 +12,9 @@ export class Client<S, C, O=any>
     logger:Logger;
     websocket:WebSocket;
     handlers:Handler<S, C>[] = [];
+    /**Number of ms to postpone receiving and sending of messages.
+     * Can be used to simulate lag. */
+    fakelagMs:number = 0;
     constructor(logger:Logger)
     {
         this.logger = logger;
@@ -34,6 +37,7 @@ export class Client<S, C, O=any>
             }
             this.websocket.onmessage = (e)=>
             {
+                const f = ()=>{
                 this.logger.info(`Msg recv ${e.data}`);
                 let msg = JSON.parse(e.data as any) as ServerMessage<S, C>;
                 if (msg.c)
@@ -42,7 +46,11 @@ export class Client<S, C, O=any>
                     this.state = msg.s;
                 if (msg.clientId)
                     this.id = msg.clientId;
-               
+                }
+                if (this.fakelagMs == 0)
+                    f();
+                else
+                    setTimeout(f, this.fakelagMs);
             }
             this.websocket.onclose = ()=>
             {
@@ -64,7 +72,14 @@ export class Client<S, C, O=any>
     {
         if (transmit)
         {
-            this.websocket.send(JSON.stringify({c:c} as ClientMessage<C>));
+            const f = ()=>
+            {
+                this.websocket.send(JSON.stringify({c:c} as ClientMessage<C>));
+            }
+            if (this.fakelagMs == 0)
+                f();
+            else
+                setTimeout(f, this.fakelagMs);
         }
 
         process<S, C>(this.handlers, this.state, c, (c,t)=>this.pushCommand(c,t), this.id, this.context);
